@@ -1,0 +1,507 @@
+import streamlit as st
+import streamlit.components.v1 as components
+
+st.set_page_config(
+    page_title="WCAC Donation Widget Updater",
+    page_icon="🐷",
+    layout="wide",
+)
+
+st.title("WCAC Donation Widget Updater")
+st.markdown("Update the donation amount, preview the widget live, then copy the generated HTML into Squarespace.")
+
+
+def generate_html(amount_raised: int, monthly_goal: int) -> str:
+    percentage = round((amount_raised / monthly_goal) * 100) if monthly_goal else 0
+    remaining = max(0, monthly_goal - amount_raised)
+    return f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WCAC Donation Widget</title>
+</head>
+<body>
+    <!-- Copy everything below this line into your Squarespace Code Block -->
+    <!--
+    ====================================
+    TO UPDATE DONATION PROGRESS:
+    1. Change the --current-amount value (e.g., 450 for $450)
+    2. Change the --progress-percent value (e.g., 25% for 25% complete)
+    3. Update the text in wcac-amount-raised and wcac-percentage
+    ====================================
+    -->
+    <div class="wcac-donation-widget" style="--current-amount: ${amount_raised}; --progress-percent: {percentage}%; --monthly-goal: {monthly_goal};">
+        <style>
+            .wcac-donation-widget {{
+                font-family: system-ui, -apple-system, sans-serif;
+                max-width: 500px;
+                width: 100%;
+                margin: 0 auto;
+                padding: 40px 20px;
+                text-align: center;
+                background: linear-gradient(135deg, #FFF9F5 0%, #FFF5F0 100%);
+                border-radius: 24px;
+                box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+                position: relative;
+                overflow: visible;
+                box-sizing: border-box;
+            }}
+
+            .wcac-widget-title {{
+                font-size: 1.3rem;
+                color: #5A4A42;
+                margin-bottom: 50px;
+                font-weight: 600;
+                letter-spacing: -0.02em;
+            }}
+
+            .wcac-main-content {{
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 40px;
+                margin-bottom: 30px;
+                position: relative;
+            }}
+
+            .wcac-piggy-wrapper {{
+                position: relative;
+                width: 180px;
+                height: 180px;
+            }}
+
+            .wcac-piggy-container {{
+                width: 100%;
+                height: 100%;
+                position: relative;
+                cursor: pointer;
+                transition: transform 0.3s ease;
+            }}
+
+            .wcac-piggy-container:hover {{
+                transform: scale(1.05);
+            }}
+
+            .wcac-piggy-bank {{
+                width: 100%;
+                height: 100%;
+                position: relative;
+            }}
+
+            .piggy-body {{
+                width: 140px;
+                height: 100px;
+                background: linear-gradient(135deg, #FFB5A3 0%, #FFA590 100%);
+                border-radius: 50px;
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                box-shadow: 0 8px 20px rgba(255, 165, 144, 0.3);
+            }}
+
+            .piggy-snout {{
+                width: 45px;
+                height: 35px;
+                background: #FF9580;
+                border-radius: 50%;
+                position: absolute;
+                left: -15px;
+                top: 50%;
+                transform: translateY(-50%);
+            }}
+
+            .nostril {{
+                width: 6px;
+                height: 10px;
+                background: #E87560;
+                border-radius: 50%;
+                position: absolute;
+                top: 12px;
+            }}
+
+            .nostril.left {{ left: 12px; }}
+            .nostril.right {{ right: 12px; }}
+
+            .piggy-ear {{
+                width: 0;
+                height: 0;
+                border-left: 15px solid transparent;
+                border-right: 15px solid transparent;
+                border-bottom: 35px solid #FFB5A3;
+                position: absolute;
+                transform: rotate(-20deg);
+            }}
+
+            .piggy-ear.left {{ top: -15px; left: 25px; }}
+            .piggy-ear.right {{ top: -15px; left: 60px; transform: rotate(20deg); }}
+
+            .piggy-eye {{
+                width: 10px;
+                height: 10px;
+                background: #5A4A42;
+                border-radius: 50%;
+                position: absolute;
+                top: 30px;
+                left: 35px;
+                animation: blink 4s infinite;
+            }}
+
+            @keyframes blink {{
+                0%, 90%, 100% {{ transform: scaleY(1); }}
+                95% {{ transform: scaleY(0.1); }}
+            }}
+
+            .coin-slot {{
+                width: 35px;
+                height: 4px;
+                background: #E87560;
+                border-radius: 2px;
+                position: absolute;
+                top: -2px;
+                left: 50%;
+                transform: translateX(-50%);
+            }}
+
+            .piggy-leg {{
+                width: 14px;
+                height: 20px;
+                background: #FF9580;
+                border-radius: 0 0 7px 7px;
+                position: absolute;
+                bottom: -10px;
+            }}
+
+            .piggy-leg.front {{ left: 25px; }}
+            .piggy-leg.back {{ right: 25px; }}
+
+            .piggy-tail {{
+                width: 25px;
+                height: 25px;
+                position: absolute;
+                right: 5px;
+                top: 50%;
+                transform: translateY(-50%);
+            }}
+
+            .piggy-tail::before {{
+                content: '';
+                position: absolute;
+                width: 100%;
+                height: 100%;
+                border: 3px solid #FF9580;
+                border-radius: 50%;
+                border-bottom-color: transparent;
+                border-left-color: transparent;
+                transform: rotate(45deg);
+            }}
+
+            .wcac-hovering-coin {{
+                position: absolute;
+                width: 32px;
+                height: 32px;
+                background: linear-gradient(135deg, #FFD700, #FFA500);
+                border-radius: 50%;
+                top: -25px;
+                left: 50%;
+                transform: translateX(-50%);
+                box-shadow:
+                    inset 2px 2px 4px rgba(255, 255, 255, 0.8),
+                    inset -2px -2px 4px rgba(0, 0, 0, 0.2),
+                    0 0 15px rgba(255, 215, 0, 0.6),
+                    0 0 30px rgba(255, 215, 0, 0.3);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: bold;
+                color: #8B6914;
+                font-size: 16px;
+                text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+                animation: floatCoin 3s ease-in-out infinite, glowPulse 2s ease-in-out infinite;
+                z-index: 5;
+            }}
+
+            .wcac-hovering-coin::before {{ content: "$"; }}
+
+            @keyframes floatCoin {{
+                0%, 100% {{ transform: translateX(-50%) translateY(0) rotate(0deg); }}
+                25% {{ transform: translateX(-50%) translateY(-5px) rotate(5deg); }}
+                50% {{ transform: translateX(-50%) translateY(0) rotate(0deg); }}
+                75% {{ transform: translateX(-50%) translateY(-3px) rotate(-5deg); }}
+            }}
+
+            @keyframes glowPulse {{
+                0%, 100% {{
+                    box-shadow:
+                        inset 2px 2px 4px rgba(255, 255, 255, 0.8),
+                        inset -2px -2px 4px rgba(0, 0, 0, 0.2),
+                        0 0 15px rgba(255, 215, 0, 0.6),
+                        0 0 30px rgba(255, 215, 0, 0.3);
+                }}
+                50% {{
+                    box-shadow:
+                        inset 2px 2px 4px rgba(255, 255, 255, 0.9),
+                        inset -2px -2px 4px rgba(0, 0, 0, 0.2),
+                        0 0 20px rgba(255, 215, 0, 0.8),
+                        0 0 40px rgba(255, 215, 0, 0.5);
+                }}
+            }}
+
+            .wcac-progress-container {{
+                width: 60px;
+                height: 160px;
+                background: rgba(255, 255, 255, 0.9);
+                border-radius: 30px;
+                box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.1);
+                position: relative;
+                overflow: hidden;
+            }}
+
+            .wcac-progress-fill {{
+                width: 100%;
+                background: linear-gradient(180deg, #FFD700, #FFA500);
+                border-radius: 30px;
+                position: absolute;
+                bottom: 0;
+                height: var(--progress-percent);
+                overflow: hidden;
+                animation: fillUp 2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            }}
+
+            @keyframes fillUp {{
+                from {{ height: 0%; }}
+                to {{ height: var(--progress-percent); }}
+            }}
+
+            .sparkles {{
+                position: absolute;
+                width: 100%;
+                height: 100%;
+                opacity: 0.8;
+            }}
+
+            .sparkle {{
+                position: absolute;
+                width: 4px;
+                height: 4px;
+                background: white;
+                border-radius: 50%;
+                animation: sparkle 2s linear infinite;
+            }}
+
+            @keyframes sparkle {{
+                0%, 100% {{ opacity: 0; transform: scale(0); }}
+                50% {{ opacity: 1; transform: scale(1); }}
+            }}
+
+            .sparkle:nth-child(1) {{ left: 20%; top: 20%; animation-delay: 0s; }}
+            .sparkle:nth-child(2) {{ left: 70%; top: 40%; animation-delay: 0.5s; }}
+            .sparkle:nth-child(3) {{ left: 40%; top: 60%; animation-delay: 1s; }}
+            .sparkle:nth-child(4) {{ left: 80%; top: 80%; animation-delay: 1.5s; }}
+            .sparkle:nth-child(5) {{ left: 30%; top: 90%; animation-delay: 0.3s; }}
+
+            .wcac-stats {{ margin-bottom: 25px; }}
+
+            .wcac-amount-raised {{
+                font-size: 1.5rem;
+                font-weight: bold;
+                color: #5A4A42;
+                margin-bottom: 8px;
+            }}
+
+            .wcac-percentage {{
+                font-size: 1.1rem;
+                color: #8B7355;
+                margin-bottom: 5px;
+            }}
+
+            .wcac-goal-label {{
+                font-size: 0.9rem;
+                color: #A09080;
+                white-space: nowrap;
+            }}
+
+            @media (max-width: 400px) {{
+                .wcac-goal-label {{ font-size: 0.85rem; }}
+            }}
+
+            .wcac-cta-button {{
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                border: none;
+                padding: 14px 28px;
+                font-size: 1.05rem;
+                font-weight: 600;
+                border-radius: 50px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                box-shadow: 0 6px 20px rgba(102, 126, 234, 0.35);
+                text-decoration: none;
+                display: inline-block;
+                white-space: nowrap;
+            }}
+
+            .wcac-cta-button:hover {{
+                transform: translateY(-2px);
+                box-shadow: 0 8px 30px rgba(102, 126, 234, 0.45);
+            }}
+
+            .wcac-tooltip {{
+                position: absolute;
+                background: #333;
+                color: white;
+                padding: 10px 14px;
+                border-radius: 10px;
+                font-size: 0.9rem;
+                white-space: nowrap;
+                pointer-events: none;
+                opacity: 0;
+                transition: opacity 0.3s ease;
+                z-index: 1000;
+                bottom: -40px;
+                left: 50%;
+                transform: translateX(-50%);
+            }}
+
+            .wcac-tooltip::before {{
+                content: "";
+                position: absolute;
+                top: -5px;
+                left: 50%;
+                transform: translateX(-50%);
+                border-left: 5px solid transparent;
+                border-right: 5px solid transparent;
+                border-bottom: 5px solid #333;
+            }}
+
+            .wcac-piggy-container:hover .wcac-tooltip {{ opacity: 1; }}
+
+            @media (max-width: 480px) {{
+                .wcac-donation-widget {{ padding: 30px 20px; }}
+                .wcac-main-content {{ gap: 25px; }}
+                .wcac-piggy-wrapper {{ width: 140px; height: 140px; }}
+                .piggy-body {{ width: 110px; height: 80px; }}
+                .wcac-progress-container {{ width: 50px; height: 130px; }}
+                .wcac-cta-button {{ font-size: 1rem; padding: 14px 30px; }}
+                .wcac-amount-raised {{ font-size: 1.3rem; }}
+            }}
+
+            @media (prefers-reduced-motion: reduce) {{
+                .wcac-progress-fill,
+                .wcac-hovering-coin,
+                .sparkle,
+                .piggy-eye {{ animation: none; }}
+            }}
+        </style>
+
+        <div class="wcac-widget-title">Become a Supporter</div>
+
+        <div class="wcac-main-content">
+            <div class="wcac-piggy-wrapper">
+                <div class="wcac-hovering-coin"></div>
+                <div class="wcac-piggy-container" role="img" aria-label="Donation piggy bank">
+                    <div class="wcac-piggy-bank">
+                        <div class="piggy-body">
+                            <div class="piggy-snout">
+                                <div class="nostril left"></div>
+                                <div class="nostril right"></div>
+                            </div>
+                            <div class="piggy-ear left"></div>
+                            <div class="piggy-ear right"></div>
+                            <div class="piggy-eye"></div>
+                            <div class="coin-slot"></div>
+                            <div class="piggy-leg front"></div>
+                            <div class="piggy-leg back"></div>
+                            <div class="piggy-tail"></div>
+                        </div>
+                    </div>
+                    <div class="wcac-tooltip">Help us keep the lights on!</div>
+                </div>
+            </div>
+
+            <div class="wcac-progress-container"
+                 role="progressbar"
+                 aria-label="Donation progress"
+                 aria-valuenow="{percentage}"
+                 aria-valuemin="0"
+                 aria-valuemax="100">
+                <div class="wcac-progress-fill">
+                    <div class="sparkles">
+                        <div class="sparkle"></div>
+                        <div class="sparkle"></div>
+                        <div class="sparkle"></div>
+                        <div class="sparkle"></div>
+                        <div class="sparkle"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="wcac-stats">
+            <!-- EDIT THESE VALUES WHEN YOU UPDATE DONATIONS -->
+            <div class="wcac-amount-raised" aria-live="polite">${amount_raised:,} of ${monthly_goal:,} raised</div>
+            <div class="wcac-percentage" aria-live="polite">{percentage}% of this month's bills covered</div>
+            <div class="wcac-goal-label">Monthly Goal: ${monthly_goal:,} &bull; ${remaining:,} remaining</div>
+        </div>
+
+        <a href="https://www.wccommunityaction.org/giving" class="wcac-cta-button">
+            Become a Monthly Supporter
+        </a>
+    </div>
+    <!-- Copy everything above this line into your Squarespace Code Block -->
+</body>
+</html>"""
+
+
+# ── Sidebar: inputs ──────────────────────────────────────────────────────────
+with st.sidebar:
+    st.header("Donation Data")
+
+    amount_raised = st.number_input(
+        "Amount Raised ($)",
+        min_value=0,
+        max_value=1_000_000,
+        value=940,
+        step=10,
+    )
+    monthly_goal = st.number_input(
+        "Monthly Goal ($)",
+        min_value=1,
+        max_value=1_000_000,
+        value=2000,
+        step=100,
+    )
+
+    percentage = round((amount_raised / monthly_goal) * 100) if monthly_goal else 0
+    remaining = max(0, monthly_goal - amount_raised)
+
+    st.divider()
+    st.metric("Progress", f"{percentage}%")
+    st.metric("Remaining", f"${remaining:,}")
+
+    st.divider()
+    st.markdown(
+        """
+**How to update the widget:**
+1. Change the values above
+2. Copy the generated HTML below
+3. Open your Squarespace page
+4. Edit the Code Block with the widget
+5. Replace all the code & save
+"""
+    )
+
+# ── Main area ────────────────────────────────────────────────────────────────
+html_output = generate_html(amount_raised, monthly_goal)
+
+preview_col, code_col = st.columns([1, 1], gap="large")
+
+with preview_col:
+    st.subheader("Live Preview")
+    components.html(html_output, height=480, scrolling=False)
+
+with code_col:
+    st.subheader("Generated HTML")
+    st.caption("Click the copy icon in the top-right corner of the code block to copy.")
+    st.code(html_output, language="html")
